@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "name": "JamPeter Ops Stack",
+  "status": "beta",
+  "philosophy": "Independent narrow tools composed into a GitHub-first operational lifecycle.",
+  "phases": [
+    {
+      "id": "provision",
+      "product": "Issue Repo Admin",
+      "repository": "jam2peter/issue-repo-admin",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/issue-repo-admin/",
+      "status": "public"
+    },
+    {
+      "id": "govern",
+      "product": "Project V2 Sync",
+      "repository": "jam2peter/project-v2-sync",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/project-v2-sync/",
+      "status": "public"
+    },
+    {
+      "id": "schedule",
+      "product": "GitHub Agenda Sync",
+      "repository": "jam2peter/github-agenda-sync",
+      "ref": "v0.1-beta",
+      "site": "https://jampeter.com.br/apps/jha-calendar/",
+      "status": "public",
+      "source_of_truth": "GitHub Issues",
+      "projection": [
+        "Google Tasks",
+        "Google Calendar"
+      ]
+    },
+    {
+      "id": "preserve",
+      "product": "Auto Checkpoint",
+      "repository": "jam2peter/jha-auto-checkpoint",
+      "status": "private-candidate",
+      "note": "Operational capability exists; public productization is pending."
+    },
+    {
+      "id": "deploy-control",
+      "product": "OIDC Site Control",
+      "repository": "jam2peter/oidc-site-control",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/oidc-site-control/",
+      "status": "public"
+    },
+    {
+      "id": "deploy-engine",
+      "product": "SafeDeploy",
+      "repository": "jam2peter/safedeploy",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/safedeploy/",
+      "status": "public"
+    },
+    {
+      "id": "verify",
+      "product": "HTTPS Readback",
+      "repository": "jam2peter/https-readback",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/https-readback/",
+      "status": "public"
+    }
+  ],
+  "suites": [
+    {
+      "name": "RepoOps",
+      "repository": "jam2peter/repoops",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/repoops/",
+      "contains": [
+        "provision",
+        "govern"
+      ]
+    },
+    {
+      "name": "SafeDeploy",
+      "repository": "jam2peter/safedeploy",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/safedeploy/",
+      "integrates": [
+        "deploy-control",
+        "verify"
+      ]
+    }
+  ]
+}
