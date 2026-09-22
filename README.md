@@ -1,2 +1,209 @@
-# ops-stack
-JamPeter managed repository
+# JamPeter Ops Stack
+
+**JamPeter Ops Stack** is the integration architecture for a set of small,
+independent GitHub-first operational tools.
+
+The stack covers the lifecycle from creating a repository to proving that the
+result of a deployment is actually reachable.
+
+> Status: `v0.1-beta` architecture distribution.
+
+## Lifecycle
+
+```text
+PROVISION
+Issue Repo Admin
+      |
+      v
+GOVERN
+Project V2 Sync
+      |
+      v
+SCHEDULE
+GitHub Agenda Sync
+      |
+      v
+PRESERVE
+Auto Checkpoint (candidate / private today)
+      |
+      v
+DEPLOY
+OIDC Site Control + SafeDeploy
+      |
+      v
+VERIFY
+HTTPS Readback
+```
+
+In short:
+
+```text
+Repository -> Project -> Agenda -> Work -> Release -> Evidence
+```
+
+## Public modules
+
+| Phase | Product | Purpose |
+| --- | --- | --- |
+| Provision | [Issue Repo Admin](https://github.com/jam2peter/issue-repo-admin) | Create public/private repositories from an authorized Issue command |
+| Govern | [Project V2 Sync](https://github.com/jam2peter/project-v2-sync) | Reconcile Issues from managed repositories into one Project V2 |
+| Schedule | [GitHub Agenda Sync](https://github.com/jam2peter/github-agenda-sync) | Project selected GitHub Issues into Google Tasks or Calendar |
+| Deploy | [OIDC Site Control](https://github.com/jam2peter/oidc-site-control) | Issue/GitHub Actions client for constrained OIDC deployment operations |
+| Deploy engine | [SafeDeploy](https://github.com/jam2peter/safedeploy) | Host-side OIDC trust, staging, integrity and rollback |
+| Verify | [HTTPS Readback](https://github.com/jam2peter/https-readback) | Prove a public target state with HTTP + SHA-256 + byte count |
+
+Suite packaging remains available:
+
+- [RepoOps](https://github.com/jam2peter/repoops) = Issue Repo Admin + Project V2 Sync
+- [SafeDeploy](https://github.com/jam2peter/safedeploy) = secure deploy engine, designed to work with OIDC Site Control and HTTPS Readback
+
+## The Agenda layer
+
+GitHub Agenda Sync fills an important gap in the lifecycle.
+
+Project V2 answers:
+
+> What work exists and what state is it in?
+
+Agenda Sync answers:
+
+> When should the human see or do that work?
+
+Its current model is deliberately one-way:
+
+```text
+GitHub Issue
+   |
+   +-- no date --> Google Task
+   |
+   +-- dated ----> Google Calendar Event
+```
+
+GitHub remains the source of truth. Google Tasks/Calendar are a personal
+execution surface, not a second project database.
+
+## Preserve layer: next module
+
+The existing private `jha-auto-checkpoint` capability fits naturally between
+scheduling/execution and deployment:
+
+```text
+work completed
+   |
+   +--> classify task files and preserved WIP
+   +--> validate
+   +--> private checkpoint + SHA-256 manifest
+   +--> controlled commit
+   +--> push or retry queue
+   +--> explicit recovery
+   |
+   v
+release/deploy
+```
+
+It is **not yet represented as a public Ops Stack module**. It is tracked as the
+next productization candidate. The public architecture does not claim a public
+artifact until extraction, sanitization and CI are complete.
+
+## Full example
+
+A small application can move through the stack like this:
+
+```text
+1. Intent
+   Open an Issue for a new application.
+
+2. Provision
+   /repo-admin create status-page public
+
+3. Govern
+   Project V2 Sync adds and classifies its Issues in the operational Project.
+
+4. Schedule
+   GitHub Agenda Sync projects selected work:
+      no date -> Google Task
+      date    -> Google Calendar
+
+5. Execute / preserve
+   Work is implemented. A checkpoint tool can preserve validated work safely
+   before release.
+
+6. Deploy
+   GitHub Actions obtains an ephemeral OIDC identity.
+   OIDC Site Control / SafeDeploy stage and promote the release.
+
+7. Verify
+   HTTPS Readback records:
+      HTTP=200
+      SHA256=<response digest>
+      BYTES=<response size>
+      RESULT=PASS
+```
+
+## Adoption modes
+
+You do not need the whole stack.
+
+### Work governance
+
+```text
+Issue Repo Admin
+      +
+Project V2 Sync
+      +
+GitHub Agenda Sync
+```
+
+Useful when the deployment platform is already solved.
+
+### Delivery
+
+```text
+OIDC Site Control
+      +
+SafeDeploy
+      +
+HTTPS Readback
+```
+
+Useful when repositories already exist and you need a narrow deployment path.
+
+### Full lifecycle
+
+Use both groups and add a preserve/checkpoint layer when appropriate.
+
+See [docs/ADOPTION.md](docs/ADOPTION.md).
+
+## Trust continuity
+
+The products fit together because each phase narrows or records a different
+operational boundary:
+
+```text
+human intent
+  -> repository resource
+  -> governed work
+  -> personal schedule
+  -> validated work state
+  -> ephemeral deployment identity
+  -> promoted release
+  -> external evidence
+```
+
+No component needs to become a general-purpose administrator.
+
+## Machine-readable manifest
+
+[ops-stack.json](ops-stack.json) records the current modules, phase, public
+repository, stable reference and integration role.
+
+## Origin
+
+These modules were extracted from mechanisms used in the Laboratório JamPeter,
+then sanitized into independent public products. The Ops Stack repository is
+only the composition/architecture layer; it does not duplicate their source
+code or private runtime configuration.
+
+## License
+
+MIT
