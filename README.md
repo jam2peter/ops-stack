@@ -24,7 +24,7 @@ GitHub Agenda Sync
       |
       v
 PRESERVE
-Auto Checkpoint (candidate / private today)
+Auto Checkpoint
       |
       v
 DEPLOY
@@ -48,6 +48,7 @@ Repository -> Project -> Agenda -> Work -> Release -> Evidence
 | Provision | [Issue Repo Admin](https://github.com/jam2peter/issue-repo-admin) | Create public/private repositories from an authorized Issue command |
 | Govern | [Project V2 Sync](https://github.com/jam2peter/project-v2-sync) | Reconcile Issues from managed repositories into one Project V2 |
 | Schedule | [GitHub Agenda Sync](https://github.com/jam2peter/github-agenda-sync) | Project selected GitHub Issues into Google Tasks or Calendar |
+| Preserve | [Auto Checkpoint](https://github.com/jam2peter/auto-checkpoint) | Preserve validated task work with private SHA-256 checkpoints, controlled commit/push and explicit recovery |
 | Deploy | [OIDC Site Control](https://github.com/jam2peter/oidc-site-control) | Issue/GitHub Actions client for constrained OIDC deployment operations |
 | Deploy engine | [SafeDeploy](https://github.com/jam2peter/safedeploy) | Host-side OIDC trust, staging, integrity and rollback |
 | Verify | [HTTPS Readback](https://github.com/jam2peter/https-readback) | Prove a public target state with HTTP + SHA-256 + byte count |
@@ -82,10 +83,9 @@ GitHub Issue
 GitHub remains the source of truth. Google Tasks/Calendar are a personal
 execution surface, not a second project database.
 
-## Preserve layer: next module
+## Preserve layer
 
-The existing private `jha-auto-checkpoint` capability fits naturally between
-scheduling/execution and deployment:
+Auto Checkpoint is the public Preserve module between scheduling/execution and deployment:
 
 ```text
 work completed
@@ -101,9 +101,7 @@ work completed
 release/deploy
 ```
 
-It is **not yet represented as a public Ops Stack module**. It is tracked as the
-next productization candidate. The public architecture does not claim a public
-artifact until extraction, sanitization and CI are complete.
+The public product is `jam2peter/auto-checkpoint@v0`. The original private capability remains independent until any runtime migration is explicitly authorized.
 
 ## Full example
 
@@ -125,7 +123,7 @@ A small application can move through the stack like this:
       date    -> Google Calendar
 
 5. Execute / preserve
-   Work is implemented. A checkpoint tool can preserve validated work safely
+   Work is implemented. Auto Checkpoint preserves validated work safely
    before release.
 
 6. Deploy
@@ -170,7 +168,7 @@ Useful when repositories already exist and you need a narrow deployment path.
 
 ### Full lifecycle
 
-Use both groups and add a preserve/checkpoint layer when appropriate.
+Use both groups with Auto Checkpoint in the Preserve phase when local work should be checkpointed before release.
 
 See [docs/ADOPTION.md](docs/ADOPTION.md).
 
