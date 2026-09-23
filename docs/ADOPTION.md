@@ -8,13 +8,9 @@ Use:
 - Project V2 Sync
 - GitHub Agenda Sync
 
-Flow:
-
 ```text
 repository -> project -> personal task/calendar
 ```
-
-This is useful when deployment is already handled elsewhere.
 
 ## 2. Secure web delivery
 
@@ -24,60 +20,77 @@ Use:
 - SafeDeploy
 - HTTPS Readback
 
-Flow:
-
 ```text
 GitHub Actions OIDC -> constrained deploy -> external proof
 ```
 
-This is useful for small PHP/shared-hosting or similar environments where broad
-SSH/FTP credentials in CI are undesirable.
+## 3. Operational observation
 
-## 3. Full lifecycle
+Use:
 
-Combine both groups:
+- JamPeter Ops Audit for operational/control-plane evidence;
+- JamPeter Ops Monitor for runtime metrics normalized from an existing
+  Prometheus-compatible backend;
+- JamPeter Ops Watchdog for transition detection and deduplication.
+
+```text
+Audit -------\
+              +--> Watchdog --> NOTIFY / SILENT
+Monitor -----/
+```
+
+Ops Monitor does not require replacing an existing Prometheus/Grafana stack.
+Private endpoints and PromQL stay private.
+
+## 4. Full lifecycle
 
 ```text
 Provision -> Govern -> Schedule -> Execute -> Quality -> Preserve -> Deploy -> Verify
+     \______________________________________________________________________/
+                                      |
+                                   OBSERVE
 ```
 
-Use Quality Gate before Auto Checkpoint when validated local work should be
-verified and preserved:
-
-```text
-... -> Schedule -> Execute -> Quality Gate -> Auto Checkpoint -> Deploy -> Verify
-```
+Use Quality Gate before Auto Checkpoint when validated work should be preserved.
 
 ## Integration rules
 
 ### Project V2 Sync + Agenda Sync
 
-They may observe the same Issue, but serve different purposes.
-
-- Project V2 Sync reconciles shared operational state.
-- Agenda Sync only processes Issues explicitly marked as managed by its metadata
-  contract and projects them to Google.
-
-Do not make Google the authority for Project state.
+They may observe the same Issue but serve different purposes. GitHub remains
+the authority.
 
 ### Agenda Sync + deployment
 
-A Calendar date does not authorize a deployment. Deployment remains controlled
-by repository/workflow policy.
+A Calendar date does not authorize deployment.
 
 ### Deploy + Readback
 
-Readback is evidence after promotion. It does not grant deployment rights and
-requires no server secret.
+Readback is evidence after promotion and grants no deployment rights.
 
 ### Quality + Preserve
 
-Quality Gate proves that configured checks passed for the current Git state.
-Auto Checkpoint verifies that the report is still current before preservation.
-
-A Quality PASS does not commit or deploy anything.
+Quality Gate proves configured checks passed for the current Git state.
+Auto Checkpoint verifies report freshness before preservation.
 
 ### Preserve + deploy
 
-A checkpoint is evidence of preserved work, not automatic authorization to
-release. The deployment workflow remains an explicit boundary.
+A checkpoint is evidence of preserved work, not release authorization.
+
+### Audit + Monitor
+
+Audit checks operational coherence. Monitor checks runtime behavior. They must
+not be collapsed into one source because their cadence, evidence and failure
+semantics differ.
+
+### Monitor + existing telemetry
+
+Ops Monitor adapts existing telemetry. It must not create a parallel metrics
+database or duplicate Prometheus/Grafana merely to join the stack.
+
+### Audit/Monitor + Watchdog
+
+Watchdog receives sanitized state only. It should remain silent when the state
+is unchanged and report both degradation and recovery transitions.
+
+A Watchdog decision never authorizes automatic remediation.
