@@ -1,0 +1,17 @@
+version = 1
+profile = "ops-stack-manifest"
+
+[report]
+path = ".quality-gate/report.json"
+
+[[gate]]
+id = "manifest-json"
+phase = "lint"
+command = "python3 -m json.tool ops-stack.json >/dev/null"
+required = true
+
+[[gate]]
+id = "lifecycle-contract"
+phase = "test"
+command = "python3 -c \"import json; d=json.load(open('ops-stack.json',encoding='utf-8')); p={x['id']:x for x in d['phases']}; req={'provision','govern','schedule','quality','preserve','deploy-control','deploy-engine','verify'}; missing=req-set(p); assert not missing, 'missing phases: '+','.join(sorted(missing)); assert p['quality']['repository']=='jam2peter/quality-gate'; assert p['quality'].get('ref')=='v0'; assert p['preserve']['repository']=='jam2peter/auto-checkpoint'; assert p['preserve'].get('ref')=='v0'\""
+required = true
