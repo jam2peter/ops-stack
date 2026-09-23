@@ -96,5 +96,42 @@
         "verify"
       ]
     }
-  ]
+  ],
+  "observe": {
+    "mode": "cross-cutting",
+    "purpose": "Operational assurance across the lifecycle without broadening module permissions.",
+    "modules": [
+      {
+        "id": "audit",
+        "capability": "ops.audit-active",
+        "product": "JamPeter Ops Audit",
+        "repository": "jam2peter/ops-audit",
+        "source_repository": "jam2peter/JamPeter-Infrastructure",
+        "ref": "main",
+        "site": "https://jampeter.com.br/apps/ops-audit/",
+        "status": "public-runtime-status",
+        "answers": "Is the operational control plane coherent?"
+      },
+      {
+        "id": "monitor",
+        "capability": "ops.monitoring",
+        "product": "JamPeter Ops Monitor",
+        "repository": "jam2peter/ops-monitor",
+        "ref": "main",
+        "site": "https://jampeter.com.br/apps/ops-monitor/",
+        "status": "public-beta",
+        "answers": "How is the runtime behaving now?"
+      },
+      {
+        "id": "alert",
+        "capability": "ops.watchdog",
+        "product": "JamPeter Ops Watchdog",
+        "repository": "jam2peter/ops-watchdog",
+        "ref": "main",
+        "site": "https://jampeter.com.br/apps/ops-watchdog/",
+        "status": "public-beta",
+        "answers": "Did state change enough to notify a human?"
+      }
+    ]
+  }
 }
