@@ -24,12 +24,18 @@ jobs:
           import json
           d=json.load(open("ops-stack.json", encoding="utf-8"))
           phases={p["id"]:p for p in d["phases"]}
-          required={"provision","govern","schedule","preserve","deploy-control","deploy-engine","verify"}
+          required={"provision","govern","schedule","quality","preserve","deploy-control","deploy-engine","verify"}
           missing=required-set(phases)
           if missing:
               raise SystemExit("missing phases: "+",".join(sorted(missing)))
           if phases["schedule"]["repository"]!="jam2peter/github-agenda-sync":
               raise SystemExit("agenda sync integration missing")
+          if phases["quality"]["status"]!="public":
+              raise SystemExit("quality module must be public")
+          if phases["quality"]["repository"]!="jam2peter/quality-gate":
+              raise SystemExit("quality gate integration missing")
+          if phases["quality"].get("ref")!="v0":
+              raise SystemExit("quality gate stable ref missing")
           if phases["preserve"]["status"]!="public":
               raise SystemExit("preserve module must be public")
           if phases["preserve"]["repository"]!="jam2peter/auto-checkpoint":
