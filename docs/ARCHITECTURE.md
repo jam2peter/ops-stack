@@ -40,7 +40,7 @@ GitHub Agenda Sync
 Human / automation execution
   |
   v
-Auto Checkpoint (candidate)
+Auto Checkpoint
   | preserve validated state
   v
 Git commit / release input
@@ -85,7 +85,7 @@ Current synchronization is one-way from GitHub to Google.
 The deployment side already protects the published release, but there is a
 separate boundary before deployment: preserving validated local work.
 
-Auto Checkpoint's existing private implementation is fail-closed and provides:
+Auto Checkpoint's public product is fail-closed and provides:
 
 - explicit task file selection;
 - WIP preservation;
@@ -96,8 +96,7 @@ Auto Checkpoint's existing private implementation is fail-closed and provides:
 - explicit recovery;
 - optional offsite copy.
 
-That makes it a natural **Preserve** phase. It remains a candidate until it is
-sanitized into a public product.
+That makes it the public **Preserve** phase. The public distribution is `jam2peter/auto-checkpoint@v0`; the private origin remains a separate runtime until an explicit migration.
 
 ## Suites vs modules
 
@@ -114,7 +113,7 @@ Delivery stack
 Scheduling projection
 └── GitHub Agenda Sync
 
-Preserve candidate
+Preserve
 └── Auto Checkpoint
 ```
 
