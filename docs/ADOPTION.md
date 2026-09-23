@@ -38,13 +38,14 @@ SSH/FTP credentials in CI are undesirable.
 Combine both groups:
 
 ```text
-Provision -> Govern -> Schedule -> Execute -> Preserve -> Deploy -> Verify
+Provision -> Govern -> Schedule -> Execute -> Quality -> Preserve -> Deploy -> Verify
 ```
 
-Use Auto Checkpoint before Deploy when validated local work should be preserved:
+Use Quality Gate before Auto Checkpoint when validated local work should be
+verified and preserved:
 
 ```text
-... -> Schedule -> Execute -> Auto Checkpoint -> Deploy -> Verify
+... -> Schedule -> Execute -> Quality Gate -> Auto Checkpoint -> Deploy -> Verify
 ```
 
 ## Integration rules
@@ -68,6 +69,13 @@ by repository/workflow policy.
 
 Readback is evidence after promotion. It does not grant deployment rights and
 requires no server secret.
+
+### Quality + Preserve
+
+Quality Gate proves that configured checks passed for the current Git state.
+Auto Checkpoint verifies that the report is still current before preservation.
+
+A Quality PASS does not commit or deploy anything.
 
 ### Preserve + deploy
 
