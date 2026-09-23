@@ -15,6 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: JamPeter Quality Gate
+        uses: jam2peter/quality-gate@v0
+        with:
+          config: .jampeter/quality-gate.toml
+
       - name: Validate manifest JSON
         run: python3 -m json.tool ops-stack.json >/dev/null
 
