@@ -40,6 +40,10 @@ GitHub Agenda Sync
 Human / automation execution
   |
   v
+Quality Gate
+  | format / static / tests / security / build
+  | PASS report bound to Git state
+  v
 Auto Checkpoint
   | preserve validated state
   v
@@ -80,6 +84,20 @@ Google Tasks / Calendar = execution projection
 
 Current synchronization is one-way from GitHub to Google.
 
+## Why Quality Gate belongs here
+
+Execution alone does not prove that the work passed a consistent quality
+contract.
+
+Quality Gate turns repository-defined checks into a machine-readable PASS/FAIL
+report and binds that report to the observed Git state. Auto Checkpoint can then
+fail closed if the working tree changes after validation.
+
+The product remains intentionally generic: formatters, linters, type checkers,
+tests and security tools remain project dependencies.
+
+Public distribution: `jam2peter/quality-gate@v0`.
+
 ## Why Auto Checkpoint belongs here
 
 The deployment side already protects the published release, but there is a
@@ -113,6 +131,9 @@ Delivery stack
 Scheduling projection
 └── GitHub Agenda Sync
 
+Quality
+└── Quality Gate
+
 Preserve
 └── Auto Checkpoint
 ```
@@ -131,6 +152,7 @@ Examples:
 
 - Project V2 Sync cannot create/delete repositories.
 - Agenda Sync cannot modify GitHub Issues.
+- Quality Gate cannot commit, push or deploy changes.
 - HTTPS Readback cannot deploy files.
 - OIDC Site Control cannot become arbitrary shell access.
 - SafeDeploy cannot write outside configured roots.

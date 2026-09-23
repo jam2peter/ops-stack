@@ -34,6 +34,15 @@
       ]
     },
     {
+      "id": "quality",
+      "product": "Quality Gate",
+      "repository": "jam2peter/quality-gate",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/quality-gate/",
+      "status": "public",
+      "output": "quality-report.json + Git state fingerprint"
+    },
+    {
       "id": "preserve",
       "product": "Auto Checkpoint",
       "repository": "jam2peter/auto-checkpoint",
