@@ -38,13 +38,13 @@ SSH/FTP credentials in CI are undesirable.
 Combine both groups:
 
 ```text
-Provision -> Govern -> Schedule -> Execute -> Deploy -> Verify
+Provision -> Govern -> Schedule -> Execute -> Preserve -> Deploy -> Verify
 ```
 
-When the Auto Checkpoint public product is available, insert it before Deploy:
+Use Auto Checkpoint before Deploy when validated local work should be preserved:
 
 ```text
-... -> Schedule -> Execute -> Preserve -> Deploy -> Verify
+... -> Schedule -> Execute -> Auto Checkpoint -> Deploy -> Verify
 ```
 
 ## Integration rules

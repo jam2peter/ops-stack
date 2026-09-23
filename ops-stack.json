@@ -36,9 +36,10 @@
     {
       "id": "preserve",
       "product": "Auto Checkpoint",
-      "repository": "jam2peter/jha-auto-checkpoint",
-      "status": "private-candidate",
-      "note": "Operational capability exists; public productization is pending."
+      "repository": "jam2peter/auto-checkpoint",
+      "status": "public",
+      "ref": "v0",
+      "site": "https://jampeter.com.br/apps/auto-checkpoint/"
     },
     {
       "id": "deploy-control",
