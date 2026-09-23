@@ -4,14 +4,8 @@
 
 Ops Stack is an integration architecture, not a monolithic application.
 
-Each module keeps:
-
-- its own repository;
-- its own release lifecycle;
-- its own security boundary;
-- its own tests and documentation.
-
-The stack defines how those boundaries compose.
+Each module keeps its own repository, release lifecycle, security boundary,
+tests and documentation. The stack defines how those boundaries compose.
 
 ## End-to-end model
 
@@ -20,19 +14,18 @@ Intent
   |
   v
 Issue Repo Admin
-  | creates resource
+  |
   v
 GitHub Repository
   |
   v
 Project V2 Sync
-  | consolidates work
+  |
   v
 GitHub Project V2
   |
   v
 GitHub Agenda Sync
-  | projects selected work in time
   +--> Google Tasks
   +--> Google Calendar
   |
@@ -41,80 +34,106 @@ Human / automation execution
   |
   v
 Quality Gate
-  | format / static / tests / security / build
-  | PASS report bound to Git state
-  v
-Auto Checkpoint
-  | preserve validated state
-  v
-Git commit / release input
   |
   v
-GitHub Actions
-  | ephemeral OIDC
+Auto Checkpoint
+  |
+  v
+GitHub Actions / release input
+  |
   v
 OIDC Site Control
   |
   v
-SafeDeploy endpoint
-  | trust + integrity + staging + checkpoint + promotion
+SafeDeploy
+  |
   v
 Published target
   |
   v
 HTTPS Readback
-  | read-only external observation
+  |
   v
 Evidence
 ```
 
-## Why Agenda Sync belongs here
-
-Agenda Sync does not replace Project V2.
-
-Project V2 is the shared operational inventory. Agenda Sync is a projection of
-selected Issues into a personal time-management surface.
-
-This avoids two sources of truth:
+The full lifecycle is observed by a parallel assurance layer:
 
 ```text
-GitHub = authority
-Google Tasks / Calendar = execution projection
+                     OBSERVE
+            +------------------------+
+            | Audit                  |
+lifecycle --+ Monitor                +--> Watchdog --> NOTIFY / SILENT
+            |                        |
+            +------------------------+
 ```
 
-Current synchronization is one-way from GitHub to Google.
+## Why OBSERVE is cross-cutting
 
-## Why Quality Gate belongs here
+Audit, metrics and alerts do not create the next lifecycle object. They observe
+multiple phases at once.
 
-Execution alone does not prove that the work passed a consistent quality
-contract.
+Representing OBSERVE as a final linear phase would be misleading: monitoring
+must also see work before deployment, and Audit may verify workflows,
+governance, quotas and blockers unrelated to one release.
 
-Quality Gate turns repository-defined checks into a machine-readable PASS/FAIL
-report and binds that report to the observed Git state. Auto Checkpoint can then
-fail closed if the working tree changes after validation.
+Therefore `ops-stack.json` keeps the delivery lifecycle in `phases` and
+defines OBSERVE separately.
 
-The product remains intentionally generic: formatters, linters, type checkers,
-tests and security tools remain project dependencies.
+## Audit vs Monitor vs Watchdog
 
-Public distribution: `jam2peter/quality-gate@v0`.
+### Ops Audit
 
-## Why Auto Checkpoint belongs here
+Audit evaluates operational coherence and evidence.
 
-The deployment side already protects the published release, but there is a
-separate boundary before deployment: preserving validated local work.
+Typical inputs:
 
-Auto Checkpoint's public product is fail-closed and provides:
+- workflow results;
+- Quality Gate state;
+- deploy/readback evidence;
+- API capacity;
+- tracked blocker state.
 
-- explicit task file selection;
-- WIP preservation;
-- validation commands;
-- SHA-256 checkpoint manifest;
-- controlled Git commit;
-- push retry queue;
-- explicit recovery;
-- optional offsite copy.
+### Ops Monitor
 
-That makes it the public **Preserve** phase. The public distribution is `jam2peter/auto-checkpoint@v0`; the private origin remains a separate runtime until an explicit migration.
+Monitor evaluates runtime behavior from existing telemetry systems.
+
+Typical upstreams:
+
+- Prometheus;
+- exporters;
+- Grafana-facing metrics;
+- logging/telemetry systems.
+
+The public product is a normalization adapter. It does not replace Prometheus
+or Grafana.
+
+### Ops Watchdog
+
+Watchdog consumes sanitized states from Audit and Monitor. It owns transition
+classification and deduplication, not notification-provider credentials and not
+remediation.
+
+```text
+baseline -> SILENT
+same state -> SILENT
+PASS -> DEGRADED -> NOTIFY
+DEGRADED -> PASS -> NOTIFY
+```
+
+## Existing lifecycle boundaries
+
+Agenda Sync is a one-way projection from GitHub authority to personal time
+management.
+
+Quality Gate turns repository-defined checks into machine-readable quality
+evidence tied to Git state.
+
+Auto Checkpoint preserves validated state without authorizing deployment.
+
+SafeDeploy and OIDC Site Control constrain release operations.
+
+HTTPS Readback is read-only proof after promotion.
 
 ## Suites vs modules
 
@@ -123,12 +142,12 @@ RepoOps
 ├── Issue Repo Admin
 └── Project V2 Sync
 
-Delivery stack
+Delivery
 ├── OIDC Site Control
 ├── SafeDeploy
 └── HTTPS Readback
 
-Scheduling projection
+Schedule
 └── GitHub Agenda Sync
 
 Quality
@@ -136,19 +155,16 @@ Quality
 
 Preserve
 └── Auto Checkpoint
-```
 
-Ops Stack is the top-level composition of these pieces.
+OBSERVE
+├── JamPeter Ops Audit
+├── JamPeter Ops Monitor
+└── JamPeter Ops Watchdog
+```
 
 ## Security principle
 
 Composition must not broaden permissions.
-
-A module may pass identifiers or state to the next phase, but it must not gain
-the previous module's administrative privileges merely because both belong to
-the stack.
-
-Examples:
 
 - Project V2 Sync cannot create/delete repositories.
 - Agenda Sync cannot modify GitHub Issues.
@@ -156,3 +172,8 @@ Examples:
 - HTTPS Readback cannot deploy files.
 - OIDC Site Control cannot become arbitrary shell access.
 - SafeDeploy cannot write outside configured roots.
+- Ops Audit cannot deploy or remediate.
+- Ops Monitor cannot administer the monitoring backend.
+- Ops Watchdog cannot repair a system.
+
+A notification is evidence, not authorization.
