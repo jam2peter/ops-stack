@@ -23,6 +23,10 @@ SCHEDULE
 GitHub Agenda Sync
       |
       v
+QUALITY
+Quality Gate
+      |
+      v
 PRESERVE
 Auto Checkpoint
       |
@@ -38,7 +42,7 @@ HTTPS Readback
 In short:
 
 ```text
-Repository -> Project -> Agenda -> Work -> Release -> Evidence
+Repository -> Project -> Agenda -> Quality -> Preserve -> Release -> Evidence
 ```
 
 ## Public modules
@@ -48,6 +52,7 @@ Repository -> Project -> Agenda -> Work -> Release -> Evidence
 | Provision | [Issue Repo Admin](https://github.com/jam2peter/issue-repo-admin) | Create public/private repositories from an authorized Issue command |
 | Govern | [Project V2 Sync](https://github.com/jam2peter/project-v2-sync) | Reconcile Issues from managed repositories into one Project V2 |
 | Schedule | [GitHub Agenda Sync](https://github.com/jam2peter/github-agenda-sync) | Project selected GitHub Issues into Google Tasks or Calendar |
+| Quality | [Quality Gate](https://github.com/jam2peter/quality-gate) | Run ordered format/clean/lint/type/test/security/build gates and bind PASS to the current Git state |
 | Preserve | [Auto Checkpoint](https://github.com/jam2peter/auto-checkpoint) | Preserve validated task work with private SHA-256 checkpoints, controlled commit/push and explicit recovery |
 | Deploy | [OIDC Site Control](https://github.com/jam2peter/oidc-site-control) | Issue/GitHub Actions client for constrained OIDC deployment operations |
 | Deploy engine | [SafeDeploy](https://github.com/jam2peter/safedeploy) | Host-side OIDC trust, staging, integrity and rollback |
@@ -82,6 +87,32 @@ GitHub Issue
 
 GitHub remains the source of truth. Google Tasks/Calendar are a personal
 execution surface, not a second project database.
+
+## Quality layer
+
+Quality Gate is the verification boundary between implementation and
+preservation.
+
+```text
+work changed
+   |
+   +--> format / clean / lint
+   +--> type / compile
+   +--> tests
+   +--> security
+   +--> build
+   |
+   v
+quality-report.json + Git fingerprint
+   |
+   v
+Auto Checkpoint verifies report freshness
+```
+
+Safe fixes run only when explicitly declared by the repository and explicitly
+enabled by the operator. Semantic failures are not automatically repaired.
+
+Public product: `jam2peter/quality-gate@v0`.
 
 ## Preserve layer
 
@@ -122,15 +153,19 @@ A small application can move through the stack like this:
       no date -> Google Task
       date    -> Google Calendar
 
-5. Execute / preserve
-   Work is implemented. Auto Checkpoint preserves validated work safely
-   before release.
+5. Quality
+   Quality Gate runs the repository contract and emits a PASS report tied to
+   the current Git state.
 
-6. Deploy
+6. Preserve
+   Auto Checkpoint verifies that report is still current, then preserves the
+   validated work before release.
+
+7. Deploy
    GitHub Actions obtains an ephemeral OIDC identity.
    OIDC Site Control / SafeDeploy stage and promote the release.
 
-7. Verify
+8. Verify
    HTTPS Readback records:
       HTTP=200
       SHA256=<response digest>
@@ -168,7 +203,8 @@ Useful when repositories already exist and you need a narrow deployment path.
 
 ### Full lifecycle
 
-Use both groups with Auto Checkpoint in the Preserve phase when local work should be checkpointed before release.
+Use both groups with Quality Gate before Auto Checkpoint when local work should
+be verified and checkpointed before release.
 
 See [docs/ADOPTION.md](docs/ADOPTION.md).
 
@@ -182,6 +218,7 @@ human intent
   -> repository resource
   -> governed work
   -> personal schedule
+  -> quality evidence
   -> validated work state
   -> ephemeral deployment identity
   -> promoted release
