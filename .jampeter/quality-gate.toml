@@ -11,7 +11,13 @@ command = "python3 -m json.tool ops-stack.json >/dev/null"
 required = true
 
 [[gate]]
-id = "lifecycle-contract"
+id = "manifest-contract"
 phase = "test"
-command = "python3 -c \"import json; d=json.load(open('ops-stack.json',encoding='utf-8')); p={x['id']:x for x in d['phases']}; req={'provision','govern','schedule','quality','preserve','deploy-control','deploy-engine','verify'}; missing=req-set(p); assert not missing, 'missing phases: '+','.join(sorted(missing)); assert p['quality']['repository']=='jam2peter/quality-gate'; assert p['quality'].get('ref')=='v0'; assert p['preserve']['repository']=='jam2peter/auto-checkpoint'; assert p['preserve'].get('ref')=='v0'\""
+command = "python3 scripts/validate_manifest.py"
+required = true
+
+[[gate]]
+id = "compile-validator"
+phase = "type"
+command = "python3 -m py_compile scripts/validate_manifest.py"
 required = true
